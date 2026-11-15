@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Predict{% endblock %}
+{% block content %}
+<h1>Score a transaction</h1>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if result %}
+  <section class="result {{ 'fraud' if result.prediction == 1 else 'legit' }}">
+    {% if result.ready %}
+      <h2>{{ 'Likely FRAUD' if result.prediction == 1 else 'Looks legitimate' }}</h2>
+      <p>Fraud probability: <strong>{{ '%.1f' % (result.probability * 100) }}%</strong>
+         (threshold {{ '%.2f' % result.threshold }})</p>
+    {% else %}
+      <h2>{{ result.message }}</h2>
+      <p>These are the engineered features the model will receive:</p>
+    {% endif %}
+    <details><summary>Engineered features</summary>
+      <table>{% for k, v in result.features.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}</table>
+    </details>
+  </section>
+{% endif %}
+
+<form method="post" class="grid">
+  <fieldset><legend>Transaction</legend>
+    <label>Amount ($)<input name="amt" type="number" step="0.01" min="0.01" required value="{{ form.amt or '' }}"></label>
+    <label>Date &amp; time<input name="trans_datetime" type="datetime-local" required value="{{ form.trans_datetime or '' }}"></label>
+    <label>Category
+      <select name="category">{% for c in categories %}
+        <option value="{{ c }}" {{ 'selected' if form.category == c }}>{{ c }}</option>{% endfor %}
+      </select></label>
+    <label>Merchant latitude<input name="merch_lat" type="number" step="any" required value="{{ form.merch_lat or '' }}"></label>
+    <label>Merchant longitude<input name="merch_long" type="number" step="any" required value="{{ form.merch_long or '' }}"></label>
+  </fieldset>
+  <fieldset><legend>Cardholder</legend>
+    <label>Date of birth<input name="dob" type="date" required value="{{ form.dob or '' }}"></label>
+    <label>Gender
+      <select name="gender"><option value="F" {{ 'selected' if form.gender == 'F' }}>F</option><option value="M" {{ 'selected' if form.gender == 'M' }}>M</option></select></label>
+    <label>Home latitude<input name="lat" type="number" step="any" required value="{{ form.lat or '' }}"></label>
+    <label>Home longitude<input name="long" type="number" step="any" required value="{{ form.long or '' }}"></label>
+    <label>City population<input name="city_pop" type="number" min="1" required value="{{ form.city_pop or '' }}"></label>
+  </fieldset>
+  <fieldset><legend>Recent card activity (optional)</legend>
+    <label>Seconds since last transaction<input name="secs_since_last_txn" type="number" min="0" value="{{ form.secs_since_last_txn or '' }}"></label>
+    <label>Transactions in past hour<input name="txn_count_1h" type="number" min="0" value="{{ form.txn_count_1h or '' }}"></label>
+    <label>Transactions in past 24h<input name="txn_count_24h" type="number" min="0" value="{{ form.txn_count_24h or '' }}"></label>
+    <label>Amount spent in past 24h ($)<input name="amt_sum_24h" type="number" step="0.01" min="0" value="{{ form.amt_sum_24h or '' }}"></label>
+    <label>Card's average amount ($)<input name="card_avg_amt" type="number" step="0.01" min="0" value="{{ form.card_avg_amt or '' }}"></label>
+  </fieldset>
+  <button type="submit">Score transaction</button>
+</form>
+{% endblock %}

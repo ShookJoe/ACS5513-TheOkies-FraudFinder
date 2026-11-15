@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Credit Card Fraud Finder</h1>
+<p>Fraud Finder scores a single card transaction and estimates the probability that it is fraudulent.
+It is trained on the Kaggle "Credit Card Transactions Fraud Detection" (Sparkov) dataset:
+about 1.85 million simulated transactions from 2019–2020.</p>
+<ul>
+  <li><strong>Inputs:</strong> amount, time, merchant category, customer and merchant location, and recent activity on the card</li>
+  <li><strong>Output:</strong> fraud probability, plus a flag/allow decision at a tuned threshold</li>
+</ul>
+<p><a class="button" href="{{ url_for('pages.predict_page') }}">Try a prediction</a></p>
+{% endblock %}
